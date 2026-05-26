@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1C1B1F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Notes</title>
+
+  <!-- Material Symbols (icons) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <!-- Roboto — Material 3 typography -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" />
+
+  <style>
+    /* ============================================================
+       MATERIAL 3 DESIGN TOKENS (Light + Dark)
+       ============================================================ */
+    :root {
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-primary-container: #EADDFF;
+      --md-sys-color-on-primary-container: #21005D;
+      --md-sys-color-secondary-container: #E8DEF8;
+      --md-sys-color-on-secondary-container: #1D192B;
+      --md-sys-color-surface: #FFFBFE;
+      --md-sys-color-surface-container: #F3EDF7;
+      --md-sys-color-surface-container-high: #ECE6F0;
+      --md-sys-color-on-surface: #1C1B1F;
+      --md-sys-color-on-surface-variant: #49454F;
+      --md-sys-color-outline: #79747E;
+      --md-sys-color-outline-variant: #CAC4D0;
+      --md-sys-color-error: #B3261E;
+      --md-sys-color-error-container: #F9DEDC;
+      --md-sys-color-on-error-container: #410E0B;
+      --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.12);
+      --md-sys-elevation-2: 0 2px 6px rgba(0,0,0,.1), 0 4px 12px rgba(0,0,0,.08);
+      --md-sys-elevation-3: 0 4px 16px rgba(0,0,0,.12);
+      --fab-size: 56px;
+      --header-height: 64px;
+      --radius-card: 16px;
+      --radius-full: 999px;
+      --transition: 0.25s cubic-bezier(0.2, 0, 0, 1);
+      font-family: 'Roboto', system-ui, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --md-sys-color-primary: #D0BCFF;
+      --md-sys-color-on-primary: #381E72;
+      --md-sys-color-primary-container: #4F378B;
+      --md-sys-color-on-primary-container: #EADDFF;
+      --md-sys-color-secondary-container: #4A4458;
+      --md-sys-color-on-secondary-container: #E8DEF8;
+      --md-sys-color-surface: #1C1B1F;
+      --md-sys-color-surface-container: #211F26;
+      --md-sys-color-surface-container-high: #2B2930;
+      --md-sys-color-on-surface: #E6E1E5;
+      --md-sys-color-on-surface-variant: #CAC4D0;
+      --md-sys-color-outline: #938F99;
+      --md-sys-color-outline-variant: #49454F;
+      --md-sys-color-error: #F2B8B5;
+      --md-sys-color-error-container: #8C1D18;
+      --md-sys-color-on-error-container: #F9DEDC;
+      --md-sys-elevation-1: 0 1px 3px rgba(0,0,0,.4);
+      --md-sys-elevation-2: 0 4px 12px rgba(0,0,0,.5);
+      --md-sys-elevation-3: 0 8px 24px rgba(0,0,0,.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Block scroll & hide app until password is set or entered */
+    body.gate-active {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100dvh;
+      touch-action: none;
+    }
+    #gate {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      background: var(--md-sys-color-surface);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #gate.hidden { display: none !important; }
+    #mainApp { display: none; min-height: 100dvh; }
+    #mainApp.visible { display: block; }
+    .gate-panel { display: none; }
+    .gate-panel.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 32px 24px;
+      padding-top: max(32px, env(safe-area-inset-top));
+      padding-bottom: max(32px, env(safe-area-inset-bottom));
+    }
+    .gate-panel__inner { width: 100%; max-width: 360px; }
+    .gate-panel h1 {
+      font-size: 24px;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .gate-panel > .gate-panel__inner > p,
+    .gate-panel > p {
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .gate-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .gate-actions .btn-filled,
+    .gate-actions .btn-outlined { width: 100%; max-width: none; }
+
+    .material-symbols-rounded {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      user-select: none;
+    }
+
+    /* ============================================================
+       APP SHELL & SCREENS
+       ============================================================ */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      position: relative;
+      padding-bottom: calc(var(--fab-size) + 32px);
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn var(--transition);
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* —— Home header —— */
+    .home-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--md-sys-color-surface);
+      padding: 16px 16px 8px;
+      padding-top: max(16px, env(safe-area-inset-top));
+    }
+
+    .home-header__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .home-header__title {
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: -0.5px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+    }
+    .icon-btn:hover, .icon-btn:active {
+      background: var(--md-sys-color-surface-container-high);
+    }
+
+    /* Search bar — Material 3 filled text field style */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--md-sys-color-surface-container-high);
+      border-radius: 28px;
+      padding: 0 16px;
+      height: 48px;
+      transition: box-shadow var(--transition);
+    }
+    .search-bar:focus-within {
+      box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+    }
+    .search-bar .material-symbols-rounded {
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 22px;
+    }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font: 16px/24px 'Roboto', sans-serif;
+      color: var(--md-sys-color-on-surface);
+      outline: none;
+    }
+    .search-bar input::placeholder {
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* —— Notes list —— */
+    .notes-list {
+      padding: 8px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Note card widget */
+    .note-card-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-card);
+    }
+
+    .note-card-delete-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--md-sys-color-error-container);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 24px;
+      color: var(--md-sys-color-on-error-container);
+      border-radius: var(--radius-card);
+    }
+
+    .note-card {
+      background: var(--md-sys-color-surface-container);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      box-shadow: var(--md-sys-elevation-1);
+      cursor: pointer;
+      touch-action: pan-y;
+      transition: transform var(--transition), box-shadow var(--transition);
+      position: relative;
+      z-index: 1;
+      will-change: transform;
+    }
+    .note-card:active {
+      box-shadow: var(--md-sys-elevation-2);
+    }
+
+    .note-card__title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .note-card__preview {
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .note-card__date {
+      font-size: 12px;
+      color: var(--md-sys-color-outline);
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      right: max(24px, calc(50% - 240px + 24px));
+      width: var(--fab-size);
+      height: var(--fab-size);
+      border-radius: 16px;
+      border: none;
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      box-shadow: var(--md-sys-elevation-3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, box-shadow var(--transition);
+      z-index: 20;
+    }
+    .fab:hover { box-shadow: var(--md-sys-elevation-3), 0 0 0 4px rgba(103,80,164,.15); }
+    .fab:active { transform: scale(0.95); }
+    .fab .material-symbols-rounded { font-size: 28px; }
+
+    /* Empty state */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 32px;
+      text-align: center;
+      min-height: 50vh;
+    }
+    .empty-state.visible { display: flex; }
+
+    .empty-state__icon-wrap {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--md-sys-color-primary-container);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      animation: float 3s ease-in-out infinite;
+    }
+    .empty-state__icon-wrap .material-symbols-rounded {
+      font-size: 56px;
+      color: var(--md-sys-color-on-primary-container);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.85; transform: scale(0.95); }
+    }
+
+    .empty-state h2 {
+      font-size: 22px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .empty-state p {
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    /* —— Editor screen —— */
+    .editor-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 8px 8px 4px;
+      padding-top: max(8px, env(safe-area-inset-top));
+      position: sticky;
+      top: 0;
+      background: var(--md-sys-color-surface);
+      z-index: 10;
+    }
+
+    .editor-header__actions {
+      margin-left: auto;
+      display: flex;
+      gap: 4px;
+    }
+
+    .btn-filled {
+      height: 40px;
+      padding: 0 24px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      font: 14px/20px 'Roboto', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity var(--transition), transform 0.15s;
+    }
+    .btn-filled:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+    .btn-filled:not(:disabled):active { transform: scale(0.97); }
+
+    .editor-body {
+      padding: 8px 20px 32px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-sys-color-primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      margin-top: 16px;
+    }
+
+    .field-input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      background: transparent;
+      font-family: 'Roboto', sans-serif;
+      color: var(--md-sys-color-on-surface);
+      padding: 8px 0;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .field-input:focus {
+      border-bottom-width: 2px;
+      border-color: var(--md-sys-color-primary);
+      padding-bottom: 7px;
+    }
+
+    #noteTitle {
+      font-size: 24px;
+      font-weight: 400;
+    }
+
+    #noteDescription {
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 200px;
+      resize: none;
+      border-bottom: none;
+    }
+
+    .editor-datetime {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding: 12px 16px;
+      background: var(--md-sys-color-surface-container);
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* Snackbar */
+    .snackbar {
+      position: fixed;
+      bottom: max(96px, calc(env(safe-area-inset-bottom) + 80px));
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--md-sys-color-inverse-surface, #313033);
+      color: var(--md-sys-color-inverse-on-surface, #F4EFF4);
+      padding: 14px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      box-shadow: var(--md-sys-elevation-2);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      z-index: 100;
+      max-width: calc(100% - 32px);
+      text-align: center;
+    }
+    .snackbar.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Loading overlay */
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.2);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .loading.visible { display: flex; }
+    .loading__spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--md-sys-color-surface-container-high);
+      border-top-color: var(--md-sys-color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Firebase setup banner */
+    .setup-banner {
+      display: none;
+      margin: 8px 16px;
+      padding: 12px 16px;
+      background: var(--md-sys-color-error-container);
+      color: var(--md-sys-color-on-error-container);
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .setup-banner.visible { display: block; }
+    .setup-banner code {
+      font-size: 12px;
+      background: rgba(0,0,0,.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Card enter animation */
+    .note-card-wrapper.enter {
+      animation: cardEnter 0.35s cubic-bezier(0.2, 0, 0, 1) forwards;
+    }
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .note-card-wrapper.exit {
+      animation: cardExit 0.3s ease forwards;
+    }
+    @keyframes cardExit {
+      to { opacity: 0; transform: translateX(-100%); height: 0; margin: 0; padding: 0; }
+    }
+
+    /* —— Lock screen —— */
+    .lock-screen {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      padding-top: max(32px, env(safe-area-inset-top));
+    }
+    .lock-screen__icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--md-sys-color-primary-container);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .lock-screen__icon .material-symbols-rounded {
+      font-size: 36px;
+      color: var(--md-sys-color-on-primary-container);
+    }
+    .lock-screen h1 {
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    .lock-screen p {
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .password-field {
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--md-sys-color-surface-container-high);
+      border-radius: 28px;
+      padding: 0 16px;
+      height: 52px;
+      margin-bottom: 16px;
+    }
+    .password-field input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font: 16px 'Roboto', sans-serif;
+      color: var(--md-sys-color-on-surface);
+      outline: none;
+    }
+    .password-field.shake {
+      animation: shake 0.4s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+    .btn-text {
+      border: none;
+      background: none;
+      color: var(--md-sys-color-primary);
+      font: 14px 'Roboto', sans-serif;
+      font-weight: 500;
+      padding: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn-outlined {
+      height: 40px;
+      padding: 0 24px;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--md-sys-color-primary);
+      font: 14px 'Roboto', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    /* —— Security settings —— */
+    .security-body { padding: 8px 16px 32px; }
+    .security-card {
+      background: var(--md-sys-color-surface-container);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--md-sys-elevation-1);
+    }
+    .security-card h3 {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .security-card p {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .security-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+    }
+    .security-row label { font-size: 14px; flex: 1; }
+    .toggle {
+      width: 52px;
+      height: 32px;
+      border-radius: 16px;
+      border: none;
+      background: var(--md-sys-color-outline-variant);
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background var(--transition);
+    }
+    .toggle.on { background: var(--md-sys-color-primary); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      top: 4px;
+      left: 4px;
+      transition: transform var(--transition);
+      box-shadow: var(--md-sys-elevation-1);
+    }
+    .toggle.on::after { transform: translateX(20px); }
+
+    .note-card__lock {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--md-sys-color-primary);
+      margin-bottom: 8px;
+    }
+    .note-card__lock .material-symbols-rounded { font-size: 16px; }
+
+    .editor-security {
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--md-sys-color-surface-container);
+      border-radius: var(--radius-card);
+    }
+    .editor-security h3 {
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .editor-security p {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    /* Password dialog */
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 150;
+      padding: 24px;
+    }
+    .dialog-overlay.visible { display: flex; }
+    .dialog {
+      background: var(--md-sys-color-surface-container-high);
+      border-radius: 28px;
+      padding: 24px;
+      width: 100%;
+      max-width: 340px;
+      animation: fadeIn var(--transition);
+    }
+    .dialog h2 {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .dialog p {
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .header-actions { display: flex; gap: 4px; }
+    .note-card--protected .note-card__preview {
+      font-style: italic;
+      opacity: 0.85;
+    }
+
+    /* Checklist */
+    .editor-block {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--md-sys-color-surface-container);
+      border-radius: var(--radius-card);
+    }
+    .editor-block__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .editor-block__head h3 {
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .checklist { display: flex; flex-direction: column; gap: 4px; }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 4px;
+      border-radius: 8px;
+    }
+    .checklist-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--md-sys-color-primary);
+      flex-shrink: 0;
+    }
+    .checklist-item input[type="text"] {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font: 15px 'Roboto', sans-serif;
+      color: var(--md-sys-color-on-surface);
+      outline: none;
+      border-bottom: 1px solid transparent;
+    }
+    .checklist-item input[type="text"]:focus {
+      border-bottom-color: var(--md-sys-color-primary);
+    }
+    .checklist-item.done input[type="text"] {
+      text-decoration: line-through;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+    .checklist-add {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .checklist-add input {
+      flex: 1;
+      height: 40px;
+      border: none;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      background: transparent;
+      font: 15px 'Roboto', sans-serif;
+      color: var(--md-sys-color-on-surface);
+      outline: none;
+    }
+    .note-card__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .note-card__chip {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .attachments-list { display: flex; flex-direction: column; gap: 8px; }
+    .attachment-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--md-sys-color-surface-container-high);
+      border-radius: 12px;
+    }
+    .attachment-item__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--md-sys-color-primary-container);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .attachment-item__icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .attachment-item__info { flex: 1; min-width: 0; }
+    .attachment-item__name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .attachment-item__size { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
+    .btn-import {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--md-sys-color-primary);
+      font: 13px 'Roboto', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    #fileImportInput { display: none; }
+  </style>
+</head>
+<body class="gate-active">
+
+  <!-- Password gate — blocks home until setup or unlock (cannot scroll past) -->
+  <div id="gate">
+    <!-- Step 1: Create app password (required) -->
+    <section id="screenSetupApp" class="gate-panel active" aria-label="Create app password">
+      <div class="gate-panel__inner">
+        <div class="lock-screen__icon" style="margin:0 auto 24px;">
+          <span class="material-symbols-rounded">lock</span>
+        </div>
+        <h1>Welcome to Notes</h1>
+        <p>Create your app password. You must set it to use Notes, and enter it each time you open the app.</p>
+        <label class="field-label" for="setupAppPassword">App password</label>
+        <div class="password-field" style="margin-bottom:12px;">
+          <span class="material-symbols-rounded" style="color:var(--md-sys-color-on-surface-variant);">key</span>
+          <input type="password" id="setupAppPassword" placeholder="At least 4 characters" autocomplete="new-password" />
+        </div>
+        <label class="field-label" for="setupAppPasswordConfirm">Confirm password</label>
+        <div class="password-field" id="setupAppField">
+          <span class="material-symbols-rounded" style="color:var(--md-sys-color-on-surface-variant);">key</span>
+          <input type="password" id="setupAppPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" />
+        </div>
+        <div class="gate-actions">
+          <button type="button" class="btn-filled" id="btnCompleteSetupApp">Set password &amp; continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Unlock on every app open -->
+    <section id="screenUnlock" class="gate-panel" aria-label="Unlock app">
+      <div class="gate-panel__inner">
+        <div class="lock-screen__icon" style="margin:0 auto 24px;">
+          <span class="material-symbols-rounded">lock</span>
+        </div>
+        <h1>Notes</h1>
+        <p id="unlockHint">Enter your password to open</p>
+        <div class="password-field" id="appLockField">
+          <span class="material-symbols-rounded" style="color:var(--md-sys-color-on-surface-variant);">key</span>
+          <input type="password" id="appLockPassword" placeholder="Password" autocomplete="current-password" />
+          <button type="button" class="icon-btn" id="btnToggleAppLockVis" aria-label="Show password">
+            <span class="material-symbols-rounded">visibility</span>
+          </button>
+        </div>
+        <div class="gate-actions">
+          <button type="button" class="btn-filled" id="btnUnlockApp">Unlock</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="mainApp">
+  <div id="app">
+
+    <!-- ==================== HOME SCREEN ==================== -->
+    <section id="screenHome" class="screen" aria-label="Home">
+      <header class="home-header">
+        <div class="home-header__top">
+          <h1 class="home-header__title">Notes</h1>
+          <div class="header-actions">
+            <button type="button" class="icon-btn" id="btnSecurity" aria-label="Security settings" style="display:none;">
+              <span class="material-symbols-rounded">shield</span>
+            </button>
+            <button type="button" class="icon-btn" id="btnLockApp" aria-label="Lock app" style="display:none;">
+              <span class="material-symbols-rounded">lock</span>
+            </button>
+            <button type="button" class="icon-btn" id="btnTheme" aria-label="Toggle dark mode">
+              <span class="material-symbols-rounded" id="themeIcon">dark_mode</span>
+            </button>
+          </div>
+        </div>
+        <div class="search-bar">
+          <span class="material-symbols-rounded">search</span>
+          <input type="search" id="searchInput" placeholder="Search notes..." autocomplete="off" />
+        </div>
+      </header>
+
+      <div id="setupBanner" class="setup-banner" role="alert">
+        Add your Firebase config in <code>FIREBASE_CONFIG</code> at the bottom of this file to save notes online.
+      </div>
+
+      <div id="emptyState" class="empty-state">
+        <div class="empty-state__icon-wrap">
+          <span class="material-symbols-rounded">note_stack</span>
+        </div>
+        <h2>No notes yet</h2>
+        <p>Tap the + button to create your first note. Your ideas stay safe in the cloud.</p>
+      </div>
+
+      <div id="notesList" class="notes-list" role="list"></div>
+    </section>
+
+    <!-- ==================== EDITOR SCREEN ==================== -->
+    <section id="screenEditor" class="screen" aria-label="Edit note">
+      <header class="editor-header">
+        <button type="button" class="icon-btn" id="btnBack" aria-label="Go back">
+          <span class="material-symbols-rounded">arrow_back</span>
+        </button>
+        <div class="editor-header__actions">
+          <button type="button" class="icon-btn" id="btnDeleteNote" aria-label="Delete note" style="display:none;">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+          <button type="button" class="btn-filled" id="btnSave" disabled>Save</button>
+        </div>
+      </header>
+
+      <div class="editor-body">
+        <label class="field-label" for="noteTitle">Title</label>
+        <input type="text" id="noteTitle" class="field-input" placeholder="Note title" maxlength="120" />
+
+        <label class="field-label" for="noteDescription">Description</label>
+        <textarea id="noteDescription" class="field-input" placeholder="Write your note..." rows="6"></textarea>
+
+        <!-- Checklist -->
+        <div class="editor-block" id="checklistBlock">
+          <div class="editor-block__head">
+            <h3><span class="material-symbols-rounded" style="font-size:20px;">checklist</span> Checklist</h3>
+          </div>
+          <div id="checklistItems" class="checklist"></div>
+          <div class="checklist-add">
+            <input type="text" id="checklistNewItem" placeholder="Add a task..." maxlength="200" />
+            <button type="button" class="icon-btn" id="btnAddChecklistItem" aria-label="Add task">
+              <span class="material-symbols-rounded">add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- File attachments -->
+        <div class="editor-block" id="attachmentsBlock">
+          <div class="editor-block__head">
+            <h3><span class="material-symbols-rounded" style="font-size:20px;">attach_file</span> Files</h3>
+            <button type="button" class="btn-import" id="btnImportFile">
+              <span class="material-symbols-rounded" style="font-size:18px;">upload_file</span>
+              Import
+            </button>
+          </div>
+          <input type="file" id="fileImportInput" multiple accept="image/*,.pdf,.txt,.md,.doc,.docx,.json,.csv" />
+          <div id="attachmentsList" class="attachments-list"></div>
+          <p style="font-size:12px;color:var(--md-sys-color-on-surface-variant);margin-top:8px;">Max 1.5 MB per file, up to 5 files per note.</p>
+        </div>
+
+        <div class="editor-datetime">
+          <span class="material-symbols-rounded" style="font-size:18px;">schedule</span>
+          <span id="editorDateTime">—</span>
+        </div>
+
+        <!-- Per-note password protection -->
+        <div class="editor-security" id="noteSecuritySection">
+          <h3>
+            <span class="material-symbols-rounded" style="font-size:20px;">lock</span>
+            Note password
+          </h3>
+          <p>Require a password to read this note. Content is encrypted on your device.</p>
+          <div class="security-row">
+            <label for="toggleNotePassword">Protect with password</label>
+            <button type="button" class="toggle" id="toggleNotePassword" aria-pressed="false"></button>
+          </div>
+          <div id="notePasswordFields" style="display:none;">
+            <label class="field-label" for="notePassword">Password</label>
+            <input type="password" id="notePassword" class="field-input" placeholder="Note password" autocomplete="new-password" />
+            <label class="field-label" for="notePasswordConfirm">Confirm password</label>
+            <input type="password" id="notePasswordConfirm" class="field-input" placeholder="Confirm password" autocomplete="new-password" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECURITY SETTINGS ==================== -->
+    <section id="screenSecurity" class="screen" aria-label="Security">
+      <header class="editor-header">
+        <button type="button" class="icon-btn" id="btnSecurityBack" aria-label="Go back">
+          <span class="material-symbols-rounded">arrow_back</span>
+        </button>
+        <span style="font-size:20px;margin-left:4px;">Security</span>
+      </header>
+      <div class="security-body">
+        <div class="security-card">
+          <h3>App password</h3>
+          <p>Lock the entire app. You must enter this password each time you open Notes.</p>
+          <label class="field-label" for="setAppPassword">New password</label>
+          <input type="password" id="setAppPassword" class="field-input" placeholder="App password" autocomplete="new-password" />
+          <label class="field-label" for="setAppPasswordConfirm">Confirm</label>
+          <input type="password" id="setAppPasswordConfirm" class="field-input" placeholder="Confirm password" autocomplete="new-password" />
+          <button type="button" class="btn-filled" id="btnSaveAppPassword" style="margin-top:16px;width:100%;">Save app password</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FAB (home only) -->
+    <button type="button" class="fab" id="fabAdd" aria-label="Add note">
+      <span class="material-symbols-rounded">add</span>
+    </button>
+  </div>
+  </div>
+
+  <!-- Note / unlock password dialog -->
+  <div id="passwordDialog" class="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <div class="dialog">
+      <h2 id="dialogTitle">Enter password</h2>
+      <p id="dialogMessage">This note is protected.</p>
+      <div class="password-field" id="dialogPasswordField">
+        <span class="material-symbols-rounded" style="color:var(--md-sys-color-on-surface-variant);">key</span>
+        <input type="password" id="dialogPassword" placeholder="Password" autocomplete="current-password" />
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn-text" id="btnDialogCancel">Cancel</button>
+        <button type="button" class="btn-filled" id="btnDialogConfirm">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="snackbar" class="snackbar" role="status"></div>
+  <div id="loading" class="loading" aria-hidden="true">
+    <div class="loading__spinner"></div>
+  </div>
+
+  <!-- Firebase SDK (Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    /* ============================================================
+       PROJECT STRUCTURE (single file, logical modules)
+
+       models/     → Note data shape
+       services/   → Firestore + local fallback
+       widgets/    → Card rendering, swipe delete
+       screens/    → Home + Editor navigation
+       app.js      → Bootstrap & theme
+       ============================================================ */
+
+    // ─────────────────────────────────────────────────────────────
+    // CONFIG — Replace with your Firebase project settings
+    // Get these from: Firebase Console → Project settings → Your apps
+    // ─────────────────────────────────────────────────────────────
+    const FIREBASE_CONFIG = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const COLLECTION_NAME = "notes";
+    const SWIPE_DELETE_THRESHOLD = 80;
+    const SECURITY_SETTINGS_KEY = "notes_security_settings_v1";
+    const LOCAL_NOTES_KEY = "notes_app_local_v1";
+    const MAX_FILE_BYTES = 1572864; // 1.5 MB per file
+    const MAX_FILES_PER_NOTE = 5;
+
+    // ─────────────────────────────────────────────────────────────
+    // SECURITY SERVICE — App lock + note encryption
+    // ─────────────────────────────────────────────────────────────
+    const SecurityService = (function () {
+      let settings = {
+        appPasswordHash: null,
+        setupComplete: false
+      };
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(SECURITY_SETTINGS_KEY);
+          if (raw) settings = { ...settings, ...JSON.parse(raw) };
+          // Existing users who already set a password are treated as setup done
+          if (settings.appPasswordHash && !settings.setupComplete) {
+            settings.setupComplete = true;
+            save();
+          }
+        } catch (e) { /* keep defaults */ }
+      }
+
+      function save() {
+        localStorage.setItem(SECURITY_SETTINGS_KEY, JSON.stringify(settings));
+      }
+
+      /** Hash password with SHA-256 (stored as hex string) */
+      async function hashPassword(password) {
+        const data = new TextEncoder().encode(password);
+        const hash = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(hash))
+          .map(b => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      async function verifyPassword(password, hash) {
+        if (!hash) return false;
+        return (await hashPassword(password)) === hash;
+      }
+
+      function isAppLockEnabled() {
+        return !!settings.appPasswordHash;
+      }
+
+      function isSetupComplete() {
+        return !!settings.setupComplete;
+      }
+
+      function markSetupComplete() {
+        settings.setupComplete = true;
+        save();
+      }
+
+      /** Returns true if password is correct */
+      async function tryUnlock(password) {
+        return await verifyPassword(password, settings.appPasswordHash);
+      }
+
+      async function setAppPassword(password) {
+        settings.appPasswordHash = await hashPassword(password);
+        save();
+      }
+
+      function getSettings() {
+        return { ...settings };
+      }
+
+      /** Encrypt note text using note password (AES-GCM + PBKDF2) */
+      async function encryptNoteText(text, password, noteId) {
+        const salt = new TextEncoder().encode("notes_salt_" + noteId);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const key = await deriveKey(password, salt);
+        const enc = new TextEncoder().encode(text);
+        const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc);
+        const combined = new Uint8Array(iv.length + cipher.byteLength);
+        combined.set(iv);
+        combined.set(new Uint8Array(cipher), iv.length);
+        return btoa(String.fromCharCode(...combined));
+      }
+
+      async function decryptNoteText(encoded, password, noteId) {
+        const raw = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+        const iv = raw.slice(0, 12);
+        const data = raw.slice(12);
+        const salt = new TextEncoder().encode("notes_salt_" + noteId);
+        const key = await deriveKey(password, salt);
+        const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+        return new TextDecoder().decode(dec);
+      }
+
+      async function deriveKey(password, salt) {
+        const enc = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+          "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+        );
+        return crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      }
+
+      async function hashNotePassword(password) {
+        return hashPassword(password);
+      }
+
+      return {
+        load, save, hashPassword, verifyPassword, tryUnlock,
+        isAppLockEnabled, isSetupComplete, markSetupComplete,
+        setAppPassword,
+        getSettings, encryptNoteText, decryptNoteText, hashNotePassword
+      };
+    })();
+
+    // ─────────────────────────────────────────────────────────────
+    // MODEL — Note shape used across the app
+    // ─────────────────────────────────────────────────────────────
+    /**
+     * @typedef {Object} Note
+     * @property {string} id
+     * @property {string} title
+     * @property {string} description
+     * @property {string} createdAt
+     * @property {string} updatedAt
+     * @property {Array} [checklist] - { id, text, done }
+     * @property {Array} [attachments] - { id, name, type, size, data }
+     * @property {boolean} [isProtected]
+     * @property {string} [passwordHash]
+     * @property {string} [descriptionEnc]
+     */
+
+    function createNotePayload(title, description, existing = null, extra = {}) {
+      const now = new Date().toISOString();
+      const base = {
+        title: title.trim(),
+        description: description.trim(),
+        createdAt: existing ? existing.createdAt : now,
+        updatedAt: now,
+        checklist: extra.checklist !== undefined ? extra.checklist : (existing?.checklist || []),
+        attachments: extra.attachments !== undefined ? extra.attachments : (existing?.attachments || [])
+      };
+      if (extra.isProtected !== undefined) base.isProtected = extra.isProtected;
+      if (extra.passwordHash !== undefined) base.passwordHash = extra.passwordHash;
+      if (extra.descriptionEnc !== undefined) base.descriptionEnc = extra.descriptionEnc;
+      return base;
+    }
+
+    function isNoteProtected(note) {
+      return !!(
+        note &&
+        note.isProtected === true &&
+        note.passwordHash &&
+        note.descriptionEnc
+      );
+    }
+
+    function isNoteUnlocked(note) {
+      return !!AppState.unlockedNotes[note.id];
+    }
+
+    function shouldHideNoteContent(note) {
+      if (isNoteUnlocked(note)) return false;
+      if (note.descriptionEnc) return true;
+      if (isNoteProtected(note)) return true;
+      if (note.isProtected && note.passwordHash) return true;
+      return false;
+    }
+
+    function getNoteTitle(note) {
+      if (shouldHideNoteContent(note)) return "Protected note";
+      return note.title || "Untitled";
+    }
+
+    function getNotePreview(note) {
+      if (shouldHideNoteContent(note)) return "Tap to enter note password";
+      const parts = [];
+      if (note.description) parts.push(note.description);
+      const cl = getChecklistSummary(note);
+      if (cl) parts.push(cl);
+      if (note.attachments?.length) parts.push(note.attachments.length + " file(s)");
+      return parts.join(" · ") || "";
+    }
+
+    function getChecklistSummary(note) {
+      const list = note.checklist || [];
+      if (!list.length) return "";
+      const done = list.filter(i => i.done).length;
+      return `Checklist ${done}/${list.length}`;
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) return "—";
+      const d = new Date(isoString);
+      return d.toLocaleString(undefined, {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // SERVICE — Firestore with localStorage fallback (offline demo)
+    // ─────────────────────────────────────────────────────────────
+    const NotesService = (function () {
+      let db = null;
+      let useFirestore = false;
+
+      function isConfigValid() {
+        return FIREBASE_CONFIG.apiKey &&
+          FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY" &&
+          FIREBASE_CONFIG.projectId &&
+          FIREBASE_CONFIG.projectId !== "YOUR_PROJECT_ID";
+      }
+
+      function init() {
+        if (!isConfigValid()) {
+          useFirestore = false;
+          return false;
+        }
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(FIREBASE_CONFIG);
+          }
+          db = firebase.firestore();
+          useFirestore = true;
+          return true;
+        } catch (e) {
+          console.error("Firebase init failed:", e);
+          useFirestore = false;
+          return false;
+        }
+      }
+
+      function collectionRef() {
+        return db.collection(COLLECTION_NAME);
+      }
+
+      /** Read all notes, newest first */
+      async function getAll() {
+        if (useFirestore) {
+          const snap = await collectionRef()
+            .orderBy("updatedAt", "desc")
+            .get();
+          return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+        const raw = localStorage.getItem(LOCAL_NOTES_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return list.sort((a, b) =>
+          new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+      }
+
+      /** Real-time listener for home screen */
+      function subscribe(callback) {
+        if (useFirestore) {
+          return collectionRef()
+            .orderBy("updatedAt", "desc")
+            .onSnapshot(
+              snap => {
+                const notes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                callback(notes);
+              },
+              err => {
+                console.error(err);
+                showSnackbar("Could not load notes. Check Firestore rules.");
+              }
+            );
+        }
+        const handler = () => getAll().then(callback);
+        window.addEventListener("storage", handler);
+        getAll().then(callback);
+        return () => window.removeEventListener("storage", handler);
+      }
+
+      async function save(noteId, payload) {
+        const data = { ...payload };
+        if (useFirestore) {
+          if (noteId) {
+            // set with merge supports new docs with a client-chosen id (needed for encryption salt)
+            await collectionRef().doc(noteId).set(data, { merge: true });
+            return noteId;
+          }
+          const ref = await collectionRef().add(data);
+          return ref.id;
+        }
+        const list = JSON.parse(localStorage.getItem(LOCAL_NOTES_KEY) || "[]");
+        if (noteId) {
+          const idx = list.findIndex(n => n.id === noteId);
+          if (idx >= 0) list[idx] = { ...list[idx], ...data };
+        } else {
+          noteId = "local_" + Date.now();
+          list.push({ id: noteId, ...data });
+        }
+        localStorage.setItem(LOCAL_NOTES_KEY, JSON.stringify(list));
+        return noteId;
+      }
+
+      async function remove(noteId) {
+        if (useFirestore) {
+          await collectionRef().doc(noteId).delete();
+          return;
+        }
+        const list = JSON.parse(localStorage.getItem(LOCAL_NOTES_KEY) || "[]");
+        localStorage.setItem(LOCAL_NOTES_KEY, JSON.stringify(list.filter(n => n.id !== noteId)));
+      }
+
+      function usingCloud() {
+        return useFirestore;
+      }
+
+      return { init, getAll, subscribe, save, remove, usingCloud, isConfigValid };
+    })();
+
+    // ─────────────────────────────────────────────────────────────
+    // WIDGETS — Note card + swipe-to-delete
+    // ─────────────────────────────────────────────────────────────
+    const NoteCardWidget = {
+      /**
+       * Build a note card DOM element with swipe-to-delete
+       * @param {Note} note
+       * @param {function(string)} onEdit
+       * @param {function(string)} onDelete
+       */
+      render(note, onEdit, onDelete) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "note-card-wrapper enter";
+        wrapper.setAttribute("role", "listitem");
+        wrapper.dataset.id = note.id;
+
+        const deleteBg = document.createElement("div");
+        deleteBg.className = "note-card-delete-bg";
+        deleteBg.innerHTML = '<span class="material-symbols-rounded">delete</span>';
+
+        const protectedNote = isNoteProtected(note);
+        const card = document.createElement("article");
+        card.className = "note-card" + (protectedNote ? " note-card--protected" : "");
+        const lockBadge = protectedNote
+          ? `<div class="note-card__lock"><span class="material-symbols-rounded">lock</span> Password protected</div>`
+          : "";
+        const chips = [];
+        if (!shouldHideNoteContent(note)) {
+          const cl = note.checklist || [];
+          if (cl.length) {
+            const done = cl.filter(i => i.done).length;
+            chips.push(`<span class="note-card__chip"><span class="material-symbols-rounded" style="font-size:14px;">checklist</span>${done}/${cl.length}</span>`);
+          }
+          if (note.attachments?.length) {
+            chips.push(`<span class="note-card__chip"><span class="material-symbols-rounded" style="font-size:14px;">attach_file</span>${note.attachments.length}</span>`);
+          }
+        }
+        const metaHtml = chips.length ? `<div class="note-card__meta">${chips.join("")}</div>` : "";
+        card.innerHTML = `
+          ${lockBadge}
+          ${metaHtml}
+          <h3 class="note-card__title">${escapeHtml(getNoteTitle(note))}</h3>
+          <p class="note-card__preview">${escapeHtml(getNotePreview(note))}</p>
+          <time class="note-card__date">${escapeHtml(formatDateTime(note.updatedAt))}</time>
+        `;
+
+        wrapper.appendChild(deleteBg);
+        wrapper.appendChild(card);
+
+        // Tap to edit
+        card.addEventListener("click", () => onEdit(note.id));
+
+        // Swipe to delete (touch)
+        this.attachSwipe(card, wrapper, () => onDelete(note.id));
+
+        return wrapper;
+      },
+
+      attachSwipe(card, wrapper, onDelete) {
+        let startX = 0;
+        let currentX = 0;
+        let dragging = false;
+
+        card.addEventListener("touchstart", e => {
+          startX = e.touches[0].clientX;
+          currentX = 0;
+          dragging = true;
+          card.style.transition = "none";
+        }, { passive: true });
+
+        card.addEventListener("touchmove", e => {
+          if (!dragging) return;
+          const dx = e.touches[0].clientX - startX;
+          // Only allow swipe left (delete direction)
+          currentX = Math.min(0, dx);
+          card.style.transform = `translateX(${currentX}px)`;
+        }, { passive: true });
+
+        const endSwipe = () => {
+          if (!dragging) return;
+          dragging = false;
+          card.style.transition = "";
+          if (currentX < -SWIPE_DELETE_THRESHOLD) {
+            wrapper.classList.add("exit");
+            setTimeout(() => onDelete(), 280);
+          } else {
+            card.style.transform = "";
+          }
+        };
+
+        card.addEventListener("touchend", endSwipe);
+        card.addEventListener("touchcancel", endSwipe);
+      }
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // SCREENS — Home & Editor
+    // ─────────────────────────────────────────────────────────────
+    const AppState = {
+      notes: [],
+      searchQuery: "",
+      editingId: null,
+      unsubscribe: null,
+      unlockedNotes: {},       // noteId → decrypted description (session)
+      notePasswords: {},       // noteId → password (memory only, cleared on lock)
+      appUnlocked: false
+    };
+
+    const HomeScreen = {
+      elements: {
+        list: document.getElementById("notesList"),
+        empty: document.getElementById("emptyState"),
+        search: document.getElementById("searchInput"),
+        fab: document.getElementById("fabAdd"),
+        setupBanner: document.getElementById("setupBanner")
+      },
+
+      init() {
+        const { search, fab, setupBanner } = this.elements;
+
+        if (!NotesService.usingCloud()) {
+          setupBanner.classList.add("visible");
+        }
+
+        search.addEventListener("input", () => {
+          AppState.searchQuery = search.value.trim().toLowerCase();
+          this.render();
+        });
+
+        fab.addEventListener("click", () => EditorScreen.openNew());
+
+        document.getElementById("btnSecurity").addEventListener("click", () => {
+          SecurityScreen.open();
+        });
+        document.getElementById("btnLockApp").addEventListener("click", () => {
+          AuthGate.lockApp();
+        });
+
+        this.updateSecurityButtons();
+      },
+
+      startNotesListener() {
+        if (AppState.unsubscribe) AppState.unsubscribe();
+        AppState.unsubscribe = NotesService.subscribe(notes => {
+          AppState.notes = notes;
+          this.render();
+        });
+      },
+
+      updateSecurityButtons() {
+        document.getElementById("btnSecurity").style.display =
+          AppState.appUnlocked ? "flex" : "none";
+        document.getElementById("btnLockApp").style.display =
+          AppState.appUnlocked ? "flex" : "none";
+      },
+
+      getFilteredNotes() {
+        const q = AppState.searchQuery;
+        if (!q) return AppState.notes;
+        return AppState.notes.filter(n => {
+          if (isNoteProtected(n) && !isNoteUnlocked(n)) {
+            return "protected note".includes(q);
+          }
+          const checklistText = (n.checklist || []).map(i => i.text).join(" ").toLowerCase();
+          return (n.title || "").toLowerCase().includes(q) ||
+            (n.description || "").toLowerCase().includes(q) ||
+            checklistText.includes(q);
+        });
+      },
+
+      render() {
+        const { list, empty, fab } = this.elements;
+        const notes = this.getFilteredNotes();
+        const hasNotes = AppState.notes.length > 0;
+        const showEmpty = !hasNotes && !AppState.searchQuery;
+
+        empty.classList.toggle("visible", showEmpty);
+        list.style.display = showEmpty ? "none" : "flex";
+        fab.style.display = showEmpty || hasNotes ? "flex" : "flex";
+
+        list.innerHTML = "";
+        notes.forEach(note => {
+          const el = NoteCardWidget.render(
+            note,
+            id => this.openNote(id),
+            async () => {
+              setLoading(true);
+              try {
+                await NotesService.remove(note.id);
+                showSnackbar("Note deleted");
+                if (!NotesService.usingCloud()) {
+                  AppState.notes = await NotesService.getAll();
+                  this.render();
+                }
+              } catch (e) {
+                showSnackbar("Delete failed");
+              } finally {
+                setLoading(false);
+              }
+            }
+          );
+          list.appendChild(el);
+        });
+
+        if (!showEmpty && notes.length === 0 && AppState.searchQuery) {
+          list.style.display = "flex";
+          list.innerHTML = `<p style="text-align:center;padding:32px;color:var(--md-sys-color-on-surface-variant);">No notes match your search.</p>`;
+        }
+      },
+
+      /** Open note — prompt for password if protected */
+      openNote(id) {
+        const note = AppState.notes.find(n => n.id === id);
+        if (!note) return;
+
+        const needsPassword = (isNoteProtected(note) || note.descriptionEnc) && !AppState.unlockedNotes[id];
+        if (needsPassword) {
+          if (!note.passwordHash) {
+            showSnackbar("This note cannot be unlocked — re-save it with a password");
+            return;
+          }
+          PasswordDialog.show({
+            title: "Unlock note",
+            message: "Enter the password for this note.",
+            onConfirm: async (password) => {
+              const ok = await SecurityService.verifyPassword(password, note.passwordHash);
+              if (!ok) {
+                showSnackbar("Wrong password");
+                return false;
+              }
+              try {
+                const text = note.descriptionEnc
+                  ? await SecurityService.decryptNoteText(note.descriptionEnc, password, id)
+                  : (note.description || "");
+                AppState.unlockedNotes[id] = text;
+                AppState.notePasswords[id] = password;
+                EditorScreen.openEdit(id);
+                return true;
+              } catch (e) {
+                showSnackbar("Could not decrypt note");
+                return false;
+              }
+            }
+          });
+          return;
+        }
+        EditorScreen.openEdit(id);
+      }
+    };
+
+    const EditorScreen = {
+      elements: {
+        title: document.getElementById("noteTitle"),
+        description: document.getElementById("noteDescription"),
+        datetime: document.getElementById("editorDateTime"),
+        save: document.getElementById("btnSave"),
+        back: document.getElementById("btnBack"),
+        deleteBtn: document.getElementById("btnDeleteNote"),
+        toggleProtect: document.getElementById("toggleNotePassword"),
+        passwordFields: document.getElementById("notePasswordFields"),
+        notePassword: document.getElementById("notePassword"),
+        notePasswordConfirm: document.getElementById("notePasswordConfirm"),
+        checklistContainer: document.getElementById("checklistItems"),
+        checklistNew: document.getElementById("checklistNewItem"),
+        attachmentsList: document.getElementById("attachmentsList"),
+        fileInput: document.getElementById("fileImportInput")
+      },
+      protectEnabled: false,
+      existingProtected: false,
+      checklist: [],
+      attachments: [],
+
+      init() {
+        const { title, description, save, back, deleteBtn, toggleProtect } = this.elements;
+
+        const validate = () => {
+          const ok = title.value.trim().length > 0;
+          save.disabled = !ok;
+        };
+
+        title.addEventListener("input", validate);
+        description.addEventListener("input", validate);
+
+        toggleProtect.addEventListener("click", () => {
+          this.protectEnabled = !this.protectEnabled;
+          toggleProtect.classList.toggle("on", this.protectEnabled);
+          toggleProtect.setAttribute("aria-pressed", String(this.protectEnabled));
+          this.elements.passwordFields.style.display =
+            this.protectEnabled ? "block" : "none";
+        });
+
+        save.addEventListener("click", () => this.save());
+        back.addEventListener("click", () => this.close());
+
+        document.getElementById("btnAddChecklistItem").addEventListener("click", () => this.addChecklistItem());
+        this.elements.checklistNew.addEventListener("keydown", e => {
+          if (e.key === "Enter") { e.preventDefault(); this.addChecklistItem(); }
+        });
+
+        document.getElementById("btnImportFile").addEventListener("click", () => {
+          this.elements.fileInput.click();
+        });
+        this.elements.fileInput.addEventListener("change", e => this.handleFileImport(e));
+
+        deleteBtn.addEventListener("click", async () => {
+          if (!AppState.editingId) return;
+          if (!confirm("Delete this note?")) return;
+          setLoading(true);
+          try {
+            await NotesService.remove(AppState.editingId);
+            showSnackbar("Note deleted");
+            this.close();
+          } catch (e) {
+            showSnackbar("Delete failed");
+          } finally {
+            setLoading(false);
+          }
+        });
+      },
+
+      resetNoteSecurityUI() {
+        this.protectEnabled = false;
+        this.existingProtected = false;
+        const { toggleProtect, passwordFields, notePassword, notePasswordConfirm } = this.elements;
+        toggleProtect.classList.remove("on");
+        toggleProtect.setAttribute("aria-pressed", "false");
+        passwordFields.style.display = "none";
+        notePassword.value = "";
+        notePasswordConfirm.value = "";
+      },
+
+      uid() {
+        return "id_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+      },
+
+      addChecklistItem(text) {
+        const t = (text || this.elements.checklistNew.value).trim();
+        if (!t) return;
+        this.checklist.push({ id: this.uid(), text: t, done: false });
+        this.elements.checklistNew.value = "";
+        this.renderChecklist();
+      },
+
+      renderChecklist() {
+        const box = this.elements.checklistContainer;
+        box.innerHTML = "";
+        this.checklist.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "checklist-item" + (item.done ? " done" : "");
+          row.innerHTML = `
+            <input type="checkbox" ${item.done ? "checked" : ""} aria-label="Mark done" />
+            <input type="text" value="${escapeHtml(item.text)}" maxlength="200" />
+            <button type="button" class="icon-btn" aria-label="Remove task"><span class="material-symbols-rounded">close</span></button>
+          `;
+          const cb = row.querySelector('input[type="checkbox"]');
+          const txt = row.querySelector('input[type="text"]');
+          cb.addEventListener("change", () => {
+            item.done = cb.checked;
+            row.classList.toggle("done", item.done);
+          });
+          txt.addEventListener("input", () => { item.text = txt.value; });
+          row.querySelector("button").addEventListener("click", () => {
+            this.checklist = this.checklist.filter(i => i.id !== item.id);
+            this.renderChecklist();
+          });
+          box.appendChild(row);
+        });
+      },
+
+      renderAttachments() {
+        const list = this.elements.attachmentsList;
+        list.innerHTML = "";
+        this.attachments.forEach(att => {
+          const row = document.createElement("div");
+          row.className = "attachment-item";
+          const isImage = att.type.startsWith("image/");
+          const iconHtml = isImage
+            ? `<img src="${att.data}" alt="">`
+            : `<span class="material-symbols-rounded">description</span>`;
+          row.innerHTML = `
+            <div class="attachment-item__icon">${iconHtml}</div>
+            <div class="attachment-item__info">
+              <div class="attachment-item__name">${escapeHtml(att.name)}</div>
+              <div class="attachment-item__size">${formatFileSize(att.size)}</div>
+            </div>
+            <button type="button" class="icon-btn" aria-label="Remove file"><span class="material-symbols-rounded">close</span></button>
+          `;
+          row.querySelector("button").addEventListener("click", () => {
+            this.attachments = this.attachments.filter(a => a.id !== att.id);
+            this.renderAttachments();
+          });
+          list.appendChild(row);
+        });
+      },
+
+      async handleFileImport(e) {
+        const files = Array.from(e.target.files || []);
+        e.target.value = "";
+        if (!files.length) return;
+
+        if (this.attachments.length + files.length > MAX_FILES_PER_NOTE) {
+          showSnackbar("Maximum " + MAX_FILES_PER_NOTE + " files per note");
+          return;
+        }
+
+        for (const file of files) {
+          if (file.size > MAX_FILE_BYTES) {
+            showSnackbar(file.name + " is too large (max 1.5 MB)");
+            continue;
+          }
+          try {
+            const data = await this.readFileAsDataUrl(file);
+            this.attachments.push({
+              id: this.uid(),
+              name: file.name,
+              type: file.type || "application/octet-stream",
+              size: file.size,
+              data
+            });
+          } catch (err) {
+            showSnackbar("Could not import " + file.name);
+          }
+        }
+        this.renderAttachments();
+      },
+
+      readFileAsDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      },
+
+      openNew() {
+        AppState.editingId = null;
+        const now = new Date().toISOString();
+        this.resetNoteSecurityUI();
+        this.checklist = [];
+        this.attachments = [];
+        this.renderChecklist();
+        this.renderAttachments();
+        this.elements.title.value = "";
+        this.elements.description.value = "";
+        this.elements.datetime.textContent = formatDateTime(now);
+        this.elements.save.disabled = true;
+        this.elements.deleteBtn.style.display = "none";
+        navigateTo("screenEditor");
+        this.elements.title.focus();
+      },
+
+      openEdit(id) {
+        const note = AppState.notes.find(n => n.id === id);
+        if (!note) return;
+        AppState.editingId = id;
+        this.resetNoteSecurityUI();
+
+        let desc = "";
+        if (isNoteProtected(note)) {
+          desc = AppState.unlockedNotes[id] || "";
+        } else {
+          desc = note.description || "";
+        }
+        this.checklist = JSON.parse(JSON.stringify(note.checklist || []));
+        this.attachments = JSON.parse(JSON.stringify(note.attachments || []));
+        this.renderChecklist();
+        this.renderAttachments();
+        this.elements.title.value = note.title || "";
+        this.elements.description.value = desc;
+        this.elements.datetime.textContent = formatDateTime(note.updatedAt);
+        this.elements.save.disabled = !note.title?.trim();
+        this.elements.deleteBtn.style.display = "flex";
+
+        if (isNoteProtected(note)) {
+          this.existingProtected = true;
+          this.protectEnabled = true;
+          this.elements.toggleProtect.classList.add("on");
+          this.elements.toggleProtect.setAttribute("aria-pressed", "true");
+          this.elements.passwordFields.style.display = "block";
+          this.elements.notePassword.placeholder = "New password (leave blank to keep)";
+        }
+
+        navigateTo("screenEditor");
+      },
+
+      async save() {
+        const title = this.elements.title.value;
+        let description = this.elements.description.value;
+        if (!title.trim()) return;
+
+        const existing = AppState.editingId
+          ? AppState.notes.find(n => n.id === AppState.editingId)
+          : null;
+
+        // Use stable id before save so encryption salt matches stored note
+        let noteId = AppState.editingId || ("local_" + Date.now());
+        const extra = {};
+
+        // Per-note password: protect, update, or remove
+        if (this.protectEnabled) {
+          let pwd = this.elements.notePassword.value;
+          const confirm = this.elements.notePasswordConfirm.value;
+
+          if (!pwd && AppState.notePasswords[noteId]) {
+            pwd = AppState.notePasswords[noteId];
+          }
+
+          if (!this.existingProtected && !pwd) {
+            showSnackbar("Enter a password for this note");
+            return;
+          }
+          if (this.elements.notePassword.value && pwd !== confirm) {
+            showSnackbar("Note passwords do not match");
+            return;
+          }
+
+          if (pwd) {
+            extra.isProtected = true;
+            if (this.elements.notePassword.value) {
+              extra.passwordHash = await SecurityService.hashNotePassword(pwd);
+              AppState.notePasswords[noteId] = pwd;
+            } else if (existing) {
+              extra.passwordHash = existing.passwordHash;
+            }
+            try {
+              extra.descriptionEnc = await SecurityService.encryptNoteText(description, pwd, noteId);
+              extra.description = "";
+            } catch (e) {
+              showSnackbar("Encryption failed");
+              return;
+            }
+          }
+        } else if (this.existingProtected && existing) {
+          let pwd = this.elements.notePassword.value || AppState.notePasswords[noteId];
+          if (!pwd) {
+            showSnackbar("Enter note password to remove protection");
+            return;
+          }
+          const ok = await SecurityService.verifyPassword(pwd, existing.passwordHash);
+          if (!ok) { showSnackbar("Wrong password"); return; }
+          if (existing.descriptionEnc) {
+            try {
+              description = await SecurityService.decryptNoteText(existing.descriptionEnc, pwd, noteId);
+            } catch (e) {
+              showSnackbar("Could not decrypt");
+              return;
+            }
+          }
+          extra.isProtected = false;
+          extra.passwordHash = null;
+          extra.descriptionEnc = null;
+          delete AppState.unlockedNotes[noteId];
+          delete AppState.notePasswords[noteId];
+        }
+
+        extra.checklist = this.checklist.filter(i => i.text.trim());
+        extra.attachments = this.attachments;
+
+        const payload = createNotePayload(title, description, existing, extra);
+
+        setLoading(true);
+        try {
+          const id = await NotesService.save(AppState.editingId || noteId, payload);
+          if (extra.isProtected) {
+            AppState.unlockedNotes[id] = description;
+          }
+          AppState.editingId = id;
+          showSnackbar("Note saved");
+          if (!NotesService.usingCloud()) {
+            AppState.notes = await NotesService.getAll();
+            HomeScreen.render();
+          }
+          this.close();
+        } catch (e) {
+          console.error(e);
+          showSnackbar("Save failed. Check Firestore rules.");
+        } finally {
+          setLoading(false);
+        }
+      },
+
+      close() {
+        navigateTo("screenHome");
+        AppState.editingId = null;
+      }
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // AUTH GATE — Mandatory setup + unlock (blocks home completely)
+    // ─────────────────────────────────────────────────────────────
+    const AuthGate = {
+      panels: {
+        setupApp: document.getElementById("screenSetupApp"),
+        unlock: document.getElementById("screenUnlock")
+      },
+
+      init() {
+        document.getElementById("btnCompleteSetupApp").addEventListener("click", () => this.completeAppSetup());
+        document.getElementById("setupAppPasswordConfirm").addEventListener("keydown", e => {
+          if (e.key === "Enter") this.completeAppSetup();
+        });
+
+        document.getElementById("btnUnlockApp").addEventListener("click", () => this.unlock());
+        document.getElementById("appLockPassword").addEventListener("keydown", e => {
+          if (e.key === "Enter") this.unlock();
+        });
+        document.getElementById("btnToggleAppLockVis").addEventListener("click", () => {
+          const inp = document.getElementById("appLockPassword");
+          inp.type = inp.type === "password" ? "text" : "password";
+        });
+
+        this.showCorrectPanel();
+      },
+
+      showPanel(name) {
+        Object.values(this.panels).forEach(p => p.classList.remove("active"));
+        this.panels[name].classList.add("active");
+      },
+
+      showCorrectPanel() {
+        document.body.classList.add("gate-active");
+        document.getElementById("gate").classList.remove("hidden");
+        document.getElementById("mainApp").classList.remove("visible");
+        AppState.appUnlocked = false;
+
+        if (!SecurityService.isAppLockEnabled() || !SecurityService.isSetupComplete()) {
+          this.showPanel("setupApp");
+        } else {
+          this.showPanel("unlock");
+          document.getElementById("appLockPassword").value = "";
+        }
+      },
+
+      async completeAppSetup() {
+        const pwd = document.getElementById("setupAppPassword").value;
+        const confirm = document.getElementById("setupAppPasswordConfirm").value;
+        const field = document.getElementById("setupAppField");
+
+        if (!pwd || pwd.length < 4) {
+          showSnackbar("Password must be at least 4 characters");
+          return;
+        }
+        if (pwd !== confirm) {
+          field.classList.add("shake");
+          setTimeout(() => field.classList.remove("shake"), 400);
+          showSnackbar("Passwords do not match");
+          return;
+        }
+
+        await SecurityService.setAppPassword(pwd);
+        SecurityService.markSetupComplete();
+        document.getElementById("setupAppPassword").value = "";
+        document.getElementById("setupAppPasswordConfirm").value = "";
+        unlockApp();
+        showSnackbar("Password saved — welcome to Notes");
+      },
+
+      async unlock() {
+        const pwd = document.getElementById("appLockPassword").value;
+        const field = document.getElementById("appLockField");
+
+        if (!pwd) {
+          showSnackbar("Enter your password");
+          return;
+        }
+
+        const ok = await SecurityService.tryUnlock(pwd);
+        if (!ok) {
+          field.classList.add("shake");
+          setTimeout(() => field.classList.remove("shake"), 400);
+          showSnackbar("Wrong password");
+          return;
+        }
+        unlockApp();
+      },
+
+      lockApp() {
+        AppState.appUnlocked = false;
+        AppState.unlockedNotes = {};
+        AppState.notePasswords = {};
+        if (AppState.unsubscribe) {
+          AppState.unsubscribe();
+          AppState.unsubscribe = null;
+        }
+        document.getElementById("screenHome").classList.remove("active");
+        this.showPanel("unlock");
+        document.getElementById("appLockPassword").value = "";
+        document.body.classList.add("gate-active");
+        document.getElementById("gate").classList.remove("hidden");
+        document.getElementById("mainApp").classList.remove("visible");
+      }
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // SECURITY SETTINGS SCREEN
+    // ─────────────────────────────────────────────────────────────
+    const SecurityScreen = {
+      init() {
+        document.getElementById("btnSecurityBack").addEventListener("click", () => {
+          navigateTo("screenHome");
+        });
+
+        document.getElementById("btnSaveAppPassword").addEventListener("click", () => this.saveAppPassword());
+      },
+
+      open() {
+        navigateTo("screenSecurity");
+      },
+
+      async saveAppPassword() {
+        const pwd = document.getElementById("setAppPassword").value;
+        const confirm = document.getElementById("setAppPasswordConfirm").value;
+        if (!pwd || pwd.length < 4) {
+          showSnackbar("Password must be at least 4 characters");
+          return;
+        }
+        if (pwd !== confirm) {
+          showSnackbar("Passwords do not match");
+          return;
+        }
+        await SecurityService.setAppPassword(pwd);
+        document.getElementById("setAppPassword").value = "";
+        document.getElementById("setAppPasswordConfirm").value = "";
+        HomeScreen.updateSecurityButtons();
+        showSnackbar("App password updated");
+        navigateTo("screenHome");
+      },
+
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // PASSWORD DIALOG — Unlock protected notes
+    // ─────────────────────────────────────────────────────────────
+    const PasswordDialog = {
+      _resolver: null,
+
+      init() {
+        document.getElementById("btnDialogCancel").addEventListener("click", () => this.hide(false));
+        document.getElementById("btnDialogConfirm").addEventListener("click", () => this.confirm());
+        document.getElementById("dialogPassword").addEventListener("keydown", e => {
+          if (e.key === "Enter") this.confirm();
+        });
+        document.getElementById("passwordDialog").addEventListener("click", e => {
+          if (e.target.id === "passwordDialog") this.hide(false);
+        });
+      },
+
+      show({ title, message, onConfirm }) {
+        document.getElementById("dialogTitle").textContent = title;
+        document.getElementById("dialogMessage").textContent = message;
+        document.getElementById("dialogPassword").value = "";
+        this._onConfirm = onConfirm;
+        document.getElementById("passwordDialog").classList.add("visible");
+        document.getElementById("dialogPassword").focus();
+      },
+
+      hide(ok) {
+        document.getElementById("passwordDialog").classList.remove("visible");
+        if (this._resolver) {
+          this._resolver(ok);
+          this._resolver = null;
+        }
+      },
+
+      async confirm() {
+        const pwd = document.getElementById("dialogPassword").value;
+        if (!pwd) {
+          showSnackbar("Enter password");
+          return;
+        }
+        const ok = await this._onConfirm(pwd);
+        if (ok !== false) this.hide(true);
+      }
+    };
+
+    function unlockApp() {
+      if (!SecurityService.isAppLockEnabled() || !SecurityService.isSetupComplete()) {
+        return;
+      }
+      AppState.appUnlocked = true;
+
+      document.body.classList.remove("gate-active");
+      document.getElementById("gate").classList.add("hidden");
+      document.getElementById("mainApp").classList.add("visible");
+
+      document.querySelectorAll("#app .screen").forEach(s => s.classList.remove("active"));
+      document.getElementById("screenHome").classList.add("active");
+      document.getElementById("fabAdd").style.display = "flex";
+
+      HomeScreen.startNotesListener();
+      HomeScreen.updateSecurityButtons();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // APP — Theme, navigation, utilities
+    // ─────────────────────────────────────────────────────────────
+    function navigateTo(screenId) {
+      if (!AppState.appUnlocked) return;
+      document.querySelectorAll("#app .screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+      document.getElementById("fabAdd").style.display =
+        screenId === "screenHome" ? "flex" : "none";
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showSnackbar(message) {
+      const el = document.getElementById("snackbar");
+      el.textContent = message;
+      el.classList.add("show");
+      clearTimeout(showSnackbar._timer);
+      showSnackbar._timer = setTimeout(() => el.classList.remove("show"), 2800);
+    }
+
+    function setLoading(visible) {
+      document.getElementById("loading").classList.toggle("visible", visible);
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem("notes_theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = saved || (prefersDark ? "dark" : "light");
+      applyTheme(theme);
+
+      document.getElementById("btnTheme").addEventListener("click", () => {
+        const next = document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light" : "dark";
+        applyTheme(next);
+        localStorage.setItem("notes_theme", next);
+      });
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+      document.getElementById("themeIcon").textContent =
+        theme === "dark" ? "light_mode" : "dark_mode";
+      document.querySelector('meta[name="theme-color"]').content =
+        theme === "dark" ? "#1C1B1F" : "#FFFBFE";
+    }
+
+    // Bootstrap
+    document.addEventListener("DOMContentLoaded", () => {
+      initTheme();
+      SecurityService.load();
+      NotesService.init();
+      AuthGate.init();
+      SecurityScreen.init();
+      PasswordDialog.init();
+      HomeScreen.init();
+      EditorScreen.init();
+      // Home stays hidden until setup + unlock (AuthGate handles this)
+    });
+  </script>
+</body>
+</html>
